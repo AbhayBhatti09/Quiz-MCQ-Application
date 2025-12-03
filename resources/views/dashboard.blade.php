@@ -7,7 +7,7 @@
             @if(auth()->user()->role_id == 2)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
                     <div class="p-6 text-gray-900">
-                        Welcome 11, <strong>{{ auth()->user()->name }}</strong> 👋  
+                        Welcome 12, <strong>{{ auth()->user()->name }}</strong> 👋  
                         <p class="text-sm text-gray-600 mt-1">User Dashboard</p>
                     </div>
                 </div>
