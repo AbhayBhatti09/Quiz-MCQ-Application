@@ -142,7 +142,8 @@ class UserWiseQuizController extends Controller
     $schedules = QuizSchedule::with('quiz')
                     ->where('user_id', $userId)
                     //->whereNotIn('quiz_id', $attemptedQuizIds)
-                     ->whereBetween('schedule_at', [$TenMinutesAgo,$now])
+                    ->where('schedule_at','>',$TenMinutesAgo)
+                     //->where('schedule_at','>',$now)
                     ->orderBy('schedule_at', 'ASC')
                     ->get();
 
