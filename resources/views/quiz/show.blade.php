@@ -126,6 +126,22 @@ submitBtn.addEventListener('click', function(e) {
       document.getElementById('quizForm').submit();
  
 });
+
+
+
+    // Auto submit on tab switch / new window
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            document.getElementById("quizForm").submit();
+        }
+    });
+
+    // Auto submit on page close / reload
+    window.addEventListener("beforeunload", function () {
+        document.getElementById("quizForm").submit();
+    });
+
+
 </script>
 
 </x-app-layout>

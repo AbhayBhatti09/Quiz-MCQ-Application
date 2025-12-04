@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/schedule/store',[UserWiseQuizController::class,'scheduleStore'])->name('schedule.store');
             Route::delete('/schedule/{id}', [UserWiseQuizController::class, 'destroySchedule'])->name('schedule.delete');
             Route::post('/schedule/toggle', [UserWiseQuizController::class, 'toggleProcess'])->name('schedule.toggle');
+            Route::get('/schedule/edit/{id}', [UserWiseQuizController::class, 'editschedule'])->name('schedule.edit');
+            Route::put('/schedule/{id}', [UserWiseQuizController::class, 'updateschedule'])->name('schedule.update');
+
 
 
         

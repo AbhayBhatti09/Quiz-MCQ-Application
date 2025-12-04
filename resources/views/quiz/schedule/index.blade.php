@@ -49,7 +49,14 @@
                                     data-id="{{ $schedule->id }}"
                                     {{ $schedule->is_processed ? 'checked' : '' }}>
                             </td>
-                            <td class="border p-2 text-center">
+                         <td class="border p-2 text-center">
+                            <div class="flex gap-2 justify-center">
+
+                                <a href="{{ route('schedule.edit', $schedule->id) }}"
+                                    class="bg-blue-600 text-white px-3 py-1 rounded">
+                                    Edit
+                                </a>
+
                                 <form action="{{ route('schedule.delete', $schedule->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
@@ -58,7 +65,11 @@
                                         Delete
                                     </button>
                                 </form>
-                            </td>
+
+                            </div>
+                        </td>
+
+
                         </tr>
                     @empty
                         <tr>

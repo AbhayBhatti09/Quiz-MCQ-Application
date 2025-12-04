@@ -142,13 +142,47 @@ class UserWiseQuizController extends Controller
     $schedules = QuizSchedule::with('quiz')
                     ->where('user_id', $userId)
                     //->whereNotIn('quiz_id', $attemptedQuizIds)
-                    ->where('schedule_at','>',$TenMinutesAgo)
-                     //->where('schedule_at','>',$now)
+                    ->where('schedule_at','>=',$TenMinutesAgo)
+                   // ->where('schedule_at','>',$now)
                     ->orderBy('schedule_at', 'ASC')
                     ->get();
 
     return view('quiz.users.schedule', compact('schedules'));
 }
+
+public function editschedule($id)
+{
+    
+    $schedule = QuizSchedule::findOrFail($id);
+    $quizs = Quiz::all();
+    $users = User::all();
+
+    return view('quiz.schedule.edit', compact('schedule', 'quizs', 'users'));
+}
+
+public function updateschedule(Request $request, $id)
+{
+   
+    $request->validate([
+        'quiz_id' => 'required',
+        'user_id' => 'required',
+        'schedule_at' => 'required|date',
+    ]);
+
+    $schedule = QuizSchedule::findOrFail($id);
+    
+    $schedule->quiz_id = $request->quiz_id;
+    $schedule->user_id = $request->user_id;
+    $schedule->schedule_at = $request->schedule_at;
+    $schedule->is_processed = $request->has('is_processed') ? 1 : 0;
+
+    $schedule->save();
+ 
+    return redirect()->route('schedule.index')
+                     ->with('success', 'Schedule updated successfully.');
+}
+
+
 
 
 }
