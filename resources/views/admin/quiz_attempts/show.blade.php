@@ -99,7 +99,11 @@
             @endforeach
 
             @if($userAns === null)
-                <p class="text-gray-500 mt-2">User skipped this question.</p>
+                @if(auth()->user()->role_id == 1)
+                    <p class="text-gray-500 mt-2">User skipped this question.</p>
+                @else
+                    <p class="text-gray-500 mt-2">You skipped this question.</p>
+                @endif
             @endif
         </div>
     @endforeach
