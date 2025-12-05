@@ -191,7 +191,7 @@ $(document).ready(function () {
                             Swal.fire("Email Sent!", "User received quiz link.", "success");
 
                             btn.replaceWith(`
-                                <button class="resendLinkBtn bg-yellow-600 text-white px-3 py-1 rounded"
+                                <button class="resendLinkBtn btn btn-warning text-white px-3 py-1 "
                                     data-id="${id}">
                                     Re-send
                                 </button>
