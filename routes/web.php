@@ -104,4 +104,16 @@ Route::get('/test-table', function () {
  // Quiz Attempt Module
         Route::get('/quiz-attempts', [AdminQuizController::class, 'index'])->name('admin.attempts.index');
         Route::get('/quiz-attempts/{id}', [AdminQuizController::class, 'show'])->name('admin.attempts.show');
+
+
+// migration 
+
+Route::get('/run-migrations', function () {
+    try {
+        \Artisan::call('migrate', ["--force" => true]);
+        return "Migrations executed successfully!";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
 require __DIR__.'/auth.php';
