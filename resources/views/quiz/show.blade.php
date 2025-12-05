@@ -1,5 +1,7 @@
 <x-app-layout>
+
 <div class="max-w-2xl mx-auto p-6">
+
     <h1 class="text-2xl font-bold mb-4">{{ $quiz->title }}</h1>
 
     <div class="text-right text-lg font-semibold mb-4">
@@ -16,8 +18,10 @@
                 <p class="font-semibold mb-2">
                     Q{{ $index + 1 }}. {{ $mcq->question }}
                 </p>
+
                 <input type="hidden" name="answers[{{ $mcq->id }}]" value="">
-                @foreach($mcq->shuffled_options as $key => $option)
+
+                @foreach($mcq->shuffled_options as $option)
                     <label class="block mb-1">
                         <input type="radio"
                                class="option"
@@ -42,9 +46,13 @@
             </button>
         </div>
     </form>
+
 </div>
 
 <script>
+// ------------------------------
+// Question Navigation + Timer
+// ------------------------------
 let current = 0;
 let timer = {{ $quiz->time_per_question ?? 30 }};
 let countdown;
@@ -57,7 +65,7 @@ const timerElement = document.getElementById('timer');
 // Start timer per question
 function startTimer() {
     clearInterval(countdown);
-    timer = {{ $quiz->time_per_question ?? 30 }}; ;
+    timer = {{ $quiz->time_per_question ?? 30 }};
     timerElement.innerText = formatTime(timer);
 
     countdown = setInterval(() => {
@@ -66,56 +74,45 @@ function startTimer() {
 
         if (timer <= 0) {
             clearInterval(countdown);
-            goToNextQuestion();  // auto skip
+            goToNextQuestion();
         }
     }, 1000);
 }
 
-// Go to next question
 function goToNextQuestion() {
     if (current < questions.length - 1) {
         current++;
         showQuestion(current);
-        startTimer();  
+        startTimer();
     } else {
         document.getElementById('quizForm').submit();
     }
 }
 
-// Show question
 function showQuestion(index) {
-    questions.forEach((q, i) => q.style.display = i === index ? 'block' : 'none');
-    
+    questions.forEach((q, i) => {
+        q.style.display = i === index ? 'block' : 'none';
+    });
+
     nextBtn.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
     submitBtn.style.display = index === questions.length - 1 ? 'inline-block' : 'none';
 }
 
-// NEXT button click
 nextBtn.addEventListener('click', () => {
     clearInterval(countdown);
     goToNextQuestion();
 });
 
-// Remove auto-next on selecting option
-document.querySelectorAll('.option').forEach(option => {
-    option.addEventListener('change', () => {
-        // Do nothing (user must click NEXT)
-    });
-});
-
-// Load first question
-showQuestion(current);
-startTimer();
+// Timer formatting
 function formatTime(sec) {
-    if (sec < 60) {
-        return sec + " sec";
-    }
+    if (sec < 60) return sec + " sec";
 
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
     return `${m}:${s} min`;
 }
 
+// Disable button multiple click
 submitBtn.addEventListener('click', function(e) {
     if (submitBtn.disabled) {
         e.preventDefault();
@@ -123,25 +120,64 @@ submitBtn.addEventListener('click', function(e) {
     }
     submitBtn.disabled = true;
     submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      document.getElementById('quizForm').submit();
- 
 });
 
+// Load first question
+showQuestion(current);
+startTimer();
 
 
-    // Auto submit on tab switch / new window
-    document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-            document.getElementById("quizForm").submit();
-        }
-    });
+// ------------------------------
+// FULLSCREEN PROTECTION
+// ------------------------------
+function openFullscreen() {
+    let el = document.documentElement;
 
-    // Auto submit on page close / reload
-    window.addEventListener("beforeunload", function () {
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+}
+
+openFullscreen();
+
+// Auto-submit if leaving fullscreen
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
         document.getElementById("quizForm").submit();
-    });
+    }
+});
 
+// ------------------------------
+// WINDOW RESIZE PROTECTION
+// ------------------------------
+let screenWidth = window.innerWidth;
+let screenHeight = window.innerHeight;
 
+window.addEventListener("resize", function () {
+    if (
+        window.innerWidth < screenWidth - 50 ||
+        window.innerHeight < screenHeight - 50
+    ) {
+        document.getElementById("quizForm").submit();
+    }
+});
+
+// ------------------------------
+// TAB SWITCH PROTECTION
+// ------------------------------
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        document.getElementById("quizForm").submit();
+    }
+});
+
+// ------------------------------
+// PAGE CLOSE / RELOAD PROTECTION
+// ------------------------------
+window.addEventListener("beforeunload", function () {
+    document.getElementById("quizForm").submit();
+});
 </script>
 
 </x-app-layout>
