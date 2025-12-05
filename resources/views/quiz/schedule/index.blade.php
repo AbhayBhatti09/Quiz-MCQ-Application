@@ -102,12 +102,12 @@
 </div>
 
 
-<!-- Page Loader -->
-<div id="pageLoader" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-transparent" style="z-index: 999; display: none;">
-    <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem; border-width: 0.5rem;">
-        <span class="visually-hidden">Loading...</span>
+
+    <div id="pageLoader" class="spinner-border text-primary" role="status"  style="display:none; position:fixed; top:50%; left:50%;">
+
     </div>
-</div>
+
+
 
 
 
