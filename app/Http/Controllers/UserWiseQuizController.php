@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\QuizSchedule;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\QuizLinkMail;
+
 
 class UserWiseQuizController extends Controller
 {
@@ -182,6 +185,48 @@ public function updateschedule(Request $request, $id)
                      ->with('success', 'Schedule updated successfully.');
 }
 
+public function sendLink(Request $request)
+{
+  
+    $schedule = QuizSchedule::findOrFail($request->id);
+    $user = $schedule->user;
+    $quiz = $schedule->quiz;
+  
+    // Email details
+    $details = [
+        'name' => $user->name,
+        'email' => $user->email,
+        'quiz_title' => $quiz->title,
+        'schedule_time' => $schedule->schedule_at,
+        'login_link' => url('/login'),
+        'login_id' => $user->email,
+        'password' => 'your-default-password', // from DB or custom logic
+        'quiz_link' => url('/my-schedule'),
+    ];
+   
+try {
+    Mail::to($user->email)->send(new QuizLinkMail($details));
+
+
+    // Update status in DB
+    $schedule->is_link_sent = true;
+    $schedule->save();
+
+    return response()->json([
+        'status' => 'sent',
+        'message' => 'Email sent successfully.'
+    ]);
+
+} catch (\Exception $e) {
+
+    return response()->json([
+        'status' => 'error',
+        'message' => 'Email could not be sent.',
+        'error' => $e->getMessage()  // remove this in production
+    ], 500);
+}
+
+}
 
 
 

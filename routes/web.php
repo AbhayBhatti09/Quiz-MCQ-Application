@@ -71,6 +71,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/schedule/toggle', [UserWiseQuizController::class, 'toggleProcess'])->name('schedule.toggle');
             Route::get('/schedule/edit/{id}', [UserWiseQuizController::class, 'editschedule'])->name('schedule.edit');
             Route::put('/schedule/{id}', [UserWiseQuizController::class, 'updateschedule'])->name('schedule.update');
+            Route::post('/schedule/send-link', [UserWiseQuizController::class, 'sendLink'])->name('schedule.sendLink');
+
 
 
 
