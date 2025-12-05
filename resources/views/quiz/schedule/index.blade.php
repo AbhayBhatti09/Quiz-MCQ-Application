@@ -101,11 +101,14 @@
     </div>
 </div>
 
-<!-- FULL SCREEN LOADER -->
-<div id="pageLoader"
-     class="fixed inset-0 bg-transparent z-[999] flex items-center justify-center hidden">
-    <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+
+<!-- Page Loader -->
+<div id="pageLoader" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-transparent" style="z-index: 999; display: none;">
+    <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem; border-width: 0.5rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 </div>
+
 
 
 
@@ -173,7 +176,7 @@ $(document).ready(function () {
 
             if (result.isConfirmed) {
 
-                $("#pageLoader").removeClass("hidden");  // SHOW LOADER
+              document.getElementById('pageLoader').style.display = 'flex'; // SHOW LOADER
 
                 $.ajax({
                     url: "{{ route('schedule.sendLink') }}",
@@ -184,7 +187,7 @@ $(document).ready(function () {
                     },
                     success: function (res) {
 
-                        $("#pageLoader").addClass("hidden");  // HIDE LOADER
+                       document.getElementById('pageLoader').style.display = 'none'; // HIDE LOADER
 
                         if (res.status === "sent") {
 
@@ -199,7 +202,7 @@ $(document).ready(function () {
                         }
                     },
                     error: function () {
-                        $("#pageLoader").addClass("hidden");
+                       document.getElementById('pageLoader').style.display = 'none';
                         Swal.fire("Error", "Email could not be sent. Try again.", "error");
                     }
                 });
