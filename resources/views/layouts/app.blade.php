@@ -39,6 +39,9 @@
             <main>
                 {{ $slot }}
             </main>
+            <footer class="text-center py-3 ">
+    © {{ date('Y') }} <a href="/" class="hover:text-blue-600">QuizMCQ</a>. All rights reserved.
+</footer>
         </div>
     </body>
 </html>
