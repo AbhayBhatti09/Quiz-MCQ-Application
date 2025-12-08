@@ -1,11 +1,11 @@
 <x-app-layout>
 
-    <div class="py-12">
+    <div class="py-12 px-2">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             {{-- USER DASHBOARD --}}
             @if(auth()->user()->role_id == 2)
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
+                <div class="bg-white overflow-hidden shadow-sm rounded mb-4">
                     <div class="p-6 text-gray-900">
                         Welcome, <strong>{{ auth()->user()->name }}</strong> 👋  
                         <p class="text-sm text-gray-600 mt-1">User Dashboard</p>
@@ -31,7 +31,7 @@
 
             {{-- ADMIN DASHBOARD --}}
             @if(auth()->user()->role_id == 1)
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
+                <div class="bg-white overflow-hidden shadow-sm rounded mb-4">
                     <div class="p-6 text-gray-900">
                         Welcome, <strong>{{ auth()->user()->name }}</strong> 👋  
                      

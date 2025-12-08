@@ -1,8 +1,8 @@
 <x-app-layout>
 
-<div class="max-w-4xl mx-auto py-10">
+<div class="max-w-4xl mx-auto py-10 px-2">
 
-    <h1 class="text-3xl font-bold mb-6">Quiz</h1>
+    <h1 class="text-3xl font-bold mb-6 ">Quiz</h1>
 
     @if($quizs->isEmpty())
 
