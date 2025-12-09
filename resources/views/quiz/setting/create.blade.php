@@ -9,7 +9,7 @@
             <a href="{{ route('quiz.setting.listing') }}" class="btn btn-light">Back</a>
         </div>
 
-        <form action="{{ isset($quiz) ? route('quiz.setting.update', $quiz->id) : route('quiz.setting.store') }}" method="POST" id="quizForm">
+        <form action="{{ isset($quiz) ? route('quiz.setting.update', $quiz->id) : route('quiz.setting.store') }}" method="{{ isset($quiz) ? 'POST' : 'POST' }}" id="quizForm">
             @csrf
             @if(isset($quiz))
                 @method('PUT')
@@ -19,33 +19,31 @@
             <div id="step1">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-bold">Step 1: Select Categories</h3>
+
+                    <button type="button"
+                        onclick="selectAllCategories()"
+                        class="px-3 py-1 bg-green-600 text-white rounded">
+                        Select All Categories
+                    </button>
                 </div>
+
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach($categories as $category)
                         @php
                             $checkedCategory = (isset($selectedCategoryIds) && in_array($category->id, $selectedCategoryIds)) ? true : false;
-                            $selectedCount = $selectedQuestionsCount[$category->id] ?? 0;
                         @endphp
-                        <label class="category-card cursor-pointer border rounded-lg p-4 flex flex-col gap-2 transition-all hover:shadow-lg hover:border-blue-500">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" class="category-checkbox hidden" value="{{ $category->id }}" {{ $checkedCategory ? 'checked' : '' }}>
-                                <div class="flex-1">
-                                    <p class="font-semibold">{{ $category->title }}</p>
-                                    <p class="text-gray-500 text-sm">{{ $category->mcqs->count() ?? 0 }} MCQs</p>
-                                </div>
-                                <div class="checkmark w-5 h-5 border rounded-full flex items-center justify-center bg-blue-500 text-white {{ $checkedCategory ? '' : 'hidden' }}">✓</div>
+                        <label class="category-card cursor-pointer border rounded-lg p-4 flex items-center gap-3 transition-all hover:shadow-lg hover:border-blue-500">
+                            <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" class="category-checkbox hidden" {{ $checkedCategory ? 'checked' : '' }}>
+                            <div class="flex-1">
+                                <p class="font-semibold">{{ $category->title }}</p>
+                                <p class="text-gray-500 text-sm">{{ $category->mcqs->count() ?? 0 }} MCQs</p>
                             </div>
-                            <!-- Input for number of questions -->
-                            <div class="mt-2 category-count-wrapper" style="display: {{ $checkedCategory ? 'block' : 'none' }}">
-                                <label class="text-sm font-semibold">Select Number of Questions:</label>
-                                <input type="number" min="1" max="{{ $category->mcqs->count() }}" class="border rounded w-full p-1 category-count" data-cat-id="{{ $category->id }}" value="{{ $selectedCount }}">
-                            </div>
+                            <div class="checkmark w-5 h-5 border rounded-full flex items-center justify-center bg-blue-500 text-white {{ $checkedCategory ? '' : 'hidden' }}">✓</div>
                         </label>
                     @endforeach
                 </div>
-
-                <p id="step1Error" class="text-red-500 text-sm mt-2 hidden"></p>
+                <p id="step1Error" class="text-red-500 text-sm mt-2 hidden">Please select at least one category.</p>
 
                 <div class="mt-4 text-right">
                     <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded" onclick="showStep2()">Next</button>
@@ -54,10 +52,17 @@
 
             <!-- Step 2: Select MCQs -->
             <div id="step2" style="display:none;">
-                <div class="flex items-center justify-between mb-4">
+               <div class="flex items-center justify-between mb-4">
                     <h3 class="font-bold">Step 2: Select MCQs</h3>
-                    <p id="selectedCount" class="font-bold text-blue-600 text-lg mt-3">Selected MCQs: 0</p>
-                    <button type="button" onclick="selectAllMCQs()" class="px-3 py-1 bg-green-600 text-white rounded">Select All MCQs</button>
+                    <p id="selectedCount" class="font-bold text-blue-600 text-lg mt-3">
+                        Selected MCQs: 0
+                    </p>
+                    
+                    <button type="button"
+                        onclick="selectAllMCQs()"
+                        class="px-3 py-1 bg-green-600 text-white rounded">
+                        Select All MCQs
+                    </button>
                 </div>
 
                 <div id="mcqList" class="mb-4"></div>
@@ -103,15 +108,16 @@
                         <input type="text" id="total_time_minutes" class="border rounded w-full p-2 bg-gray-100" value="0" readonly>
                     </div>
                 </div>
-
-                <div class="mb-3 mt-3">
-                    <label class="font-semibold">Description</label>
+               <div class="mb-3 mt-3">
+                    <label class="font-semibold">Description </label>
                     <textarea name="description" id="description" class="border rounded w-full p-2 h-28">{{ $quiz->description ?? old('description') }}</textarea>
+                    <p id="descriptionError" class="text-red-500 text-sm mt-1 hidden"></p>
                 </div>
 
                 <div class="mb-3 mt-3">
                     <label class="font-semibold">Rules</label>
                     <textarea name="rules" id="rules" class="border rounded w-full p-2 h-28">{{ $quiz->rules ?? old('rules') }}</textarea>
+                    <p id="rulesError" class="text-red-500 text-sm mt-1 hidden"></p>
                 </div>
 
                 <div class="mt-4 text-right">
@@ -123,13 +129,17 @@
         </form>
     </div>
 </div>
-
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    ClassicEditor.create(document.querySelector('#description')).catch(error => console.error(error));
-    ClassicEditor.create(document.querySelector('#rules')).catch(error => console.error(error));
-});
+    document.addEventListener("DOMContentLoaded", function() {
+        ClassicEditor
+            .create(document.querySelector('#description'))
+            .catch(error => console.error(error));
+
+        ClassicEditor
+            .create(document.querySelector('#rules'))
+            .catch(error => console.error(error));
+    });
 </script>
 
 <script>
@@ -146,69 +156,25 @@ if(selectedCategories.size > 0){
 }
 
 // Toggle category selection
-// Toggle category selection and count input visibility
 document.querySelectorAll('.category-card').forEach(card => {
     card.addEventListener('click', function(e){
         e.preventDefault();
         const checkbox = this.querySelector('input[type="checkbox"]');
         checkbox.checked = !checkbox.checked;
-
         const checkmark = this.querySelector('.checkmark');
-        const countWrapper = this.querySelector('.category-count-wrapper');
-          if (e.target.classList.contains('category-count') || 
-            e.target.closest('.category-count-wrapper')) {
-            return;
-        }
-
         if(checkbox.checked){
-      
             checkmark.classList.remove('hidden');
             selectedCategories.add(Number(checkbox.value));
-            countWrapper.style.display = 'block'; // Show input
         } else {
-    
             checkmark.classList.add('hidden');
             selectedCategories.delete(Number(checkbox.value));
-            countWrapper.style.display = 'none'; // Hide input
-
-            // Remove selected MCQs of this category
-            allMcqs.forEach(mcq => {
-                if(mcq.category_id === Number(checkbox.value)){
-                    selectedMcqs.delete(mcq.id);
-                }
-            });
-
-            generateMCQs();
-            updateTotals();
-            updateSelectedCount();
         }
     });
 });
 
-// Step navigation & validation
+// Step navigation
 function showStep2(){
     if(selectedCategories.size === 0){
-        document.getElementById('step1Error').textContent = "Please select at least one category.";
-        document.getElementById('step1Error').classList.remove('hidden');
-        return;
-    }
-
-    // Validate input per category
-    let valid = true;
-    selectedCategories.forEach(catId => {
-        const input = document.querySelector(`.category-count[data-cat-id="${catId}"]`);
-        const max = Number(input.getAttribute('max'));
-        const val = Number(input.value);
-        if(isNaN(val) || val <= 0 || val > max){
-            input.style.borderColor = 'red';
-            valid = false;
-        } else {
-            input.style.borderColor = '';
-        }
-    });
-
-    if(!valid){
-        document.getElementById('step1Error').textContent = "Please enter valid number of questions for each selected category.";
         document.getElementById('step1Error').classList.remove('hidden');
         return;
     } else {
@@ -220,8 +186,15 @@ function showStep2(){
     document.getElementById('step2').style.display = 'block';
 }
 
-function goStep1(){ document.getElementById('step2').style.display = 'none'; document.getElementById('step1').style.display = 'block'; }
-function goStep2Back(){ document.getElementById('step3').style.display = 'none'; document.getElementById('step2').style.display = 'block'; }
+function goStep1(){
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+}
+
+function goStep2Back(){
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+}
 
 function goStep3(){
     if(selectedMcqs.size === 0){
@@ -234,56 +207,57 @@ function goStep3(){
     }
 
     const quizTitle = document.getElementById('quiz_title').value.trim();
-    if(quizTitle === ''){ document.getElementById('step3Error').classList.remove('hidden'); } 
-    else { document.getElementById('step3Error').classList.add('hidden'); }
+    if(quizTitle === ''){
+        document.getElementById('step3Error').classList.remove('hidden');
+    } else {
+        document.getElementById('step3Error').classList.add('hidden');
+    }
 
     document.getElementById('step2').style.display = 'none';
     document.getElementById('step3').style.display = 'block';
     updateTotals();
 }
 
-// Generate MCQs dynamically based on per-category input
+// Generate MCQs list dynamically
 function generateMCQs(){
     let mcqHtml = '';
     let count = 0;
-    selectedMcqs.clear();
 
     selectedCategories.forEach(catId => {
-        const numInput = document.querySelector(`.category-count[data-cat-id="${catId}"]`);
-        const numQuestions = Number(numInput.value) || 0;
-
-        const categoryMcqs = allMcqs.filter(mcq => mcq.category_id === catId);
-        const shuffled = categoryMcqs.sort(() => 0.5 - Math.random());
-
-        shuffled.forEach((mcq, index) => {
-            count++;
-            let checked = index < numQuestions; // first N are checked
-            if(checked) selectedMcqs.add(mcq.id);
-
-            mcqHtml += `
-            <div class="border p-3 rounded mb-2">
-                <label class="flex items-start gap-3">
-                    <input type="checkbox" name="mcq_ids[]" value="${mcq.id}" onchange="toggleMCQ(${mcq.id});updateSelectedCount();" ${checked ? 'checked' : ''}>
-                    <div>
-                        <p class="font-semibold">Q${count}. ${mcq.question}</p>
-                        <ul class="ml-3 mt-1">
-                            <li>A) ${mcq.option_a}</li>
-                            <li>B) ${mcq.option_b}</li>
-                            <li>C) ${mcq.option_c}</li>
-                            <li>D) ${mcq.option_d}</li>
-                        </ul>
-                    </div>
-                </label>
-            </div>`;
+        allMcqs.forEach(mcq => {
+            if(mcq.category_id === catId){
+                count++;
+                const checked = selectedMcqs.has(mcq.id) ? 'checked' : '';
+                mcqHtml += `
+                <div class="border p-3 rounded mb-2">
+                    <label class="flex items-start gap-3">
+                        <input type="checkbox" name="mcq_ids[]" value="${mcq.id}" onchange="toggleMCQ(${mcq.id});updateSelectedCount();" ${checked}>
+                        <div>
+                            <p class="font-semibold">Q${count}. ${mcq.question}</p>
+                            <ul class="ml-3 mt-1">
+                                <li>A) ${mcq.option_a}</li>
+                                <li>B) ${mcq.option_b}</li>
+                                <li>C) ${mcq.option_c}</li>
+                                <li>D) ${mcq.option_d}</li>
+                            </ul>
+                        </div>
+                    </label>
+                </div>`;
+            }
         });
     });
 
     document.getElementById('mcqList').innerHTML = mcqHtml;
-    updateTotals();
-    updateSelectedCount();
 }
 
-function toggleMCQ(id){ selectedMcqs.has(id) ? selectedMcqs.delete(id) : selectedMcqs.add(id); updateTotals(); }
+// Toggle MCQ selection
+function toggleMCQ(id){
+    if(selectedMcqs.has(id)) selectedMcqs.delete(id);
+    else selectedMcqs.add(id);
+    updateTotals();
+}
+
+// Update totals
 function updateTotals(){
     document.getElementById('question_count').value = selectedMcqs.size;
     const marks = Number(document.getElementById('marks_per_question').value);
@@ -292,18 +266,80 @@ function updateTotals(){
     document.getElementById('total_time_minutes').value = ((selectedMcqs.size * time)/60).toFixed(2);
 }
 
+// Listen marks/time changes
 document.getElementById('marks_per_question').addEventListener('input', updateTotals);
 document.getElementById('time_per_question').addEventListener('input', updateTotals);
 
-function selectAllMCQs(){
-    document.querySelectorAll('#mcqList input[type="checkbox"]').forEach(chk => { chk.checked = true; selectedMcqs.add(Number(chk.value)); });
-    updateTotals(); updateSelectedCount();
+// Prevent form submission if invalid
+document.getElementById('quizForm').addEventListener('submit', function(e){
+    let valid = true;
+    const quizTitle = document.getElementById('quiz_title').value.trim();
+    if(quizTitle === ''){
+        document.getElementById('step3Error').textContent = "Quiz title is required.";
+        document.getElementById('step3Error').classList.remove('hidden');
+        valid = false;
+        goStep3();
+    } else {
+        document.getElementById('step3Error').classList.add('hidden');
+    }
+
+    const marks = Number(document.getElementById('marks_per_question').value);
+    if(isNaN(marks) || marks <= 0){
+        document.getElementById('marksError').textContent = "Marks per question must be greater than 0.";
+        document.getElementById('marksError').classList.remove('hidden');
+        valid = false;
+        goStep3();
+    } else {
+        document.getElementById('marksError').classList.add('hidden');
+    }
+
+    const time = Number(document.getElementById('time_per_question').value);
+    if(isNaN(time) || time <= 0){
+        document.getElementById('timeError').textContent = "Time per question must be greater than 0.";
+        document.getElementById('timeError').classList.remove('hidden');
+        valid = false;
+        goStep3();
+    } else {
+        document.getElementById('timeError').classList.add('hidden');
+    }
+
+
+
+
+
+    if(selectedMcqs.size === 0){
+        document.getElementById('step2Error').classList.remove('hidden');
+        valid = false;
+        goStep2Back();
+    } else {
+        document.getElementById('step2Error').classList.add('hidden');
+    }
+
+    if(!valid) e.preventDefault();
+});
+function selectAllCategories() {
+    document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+        if (!checkbox.checked) {
+            checkbox.checked = true;
+            selectedCategories.add(Number(checkbox.value));
+            checkbox.closest('.category-card').querySelector('.checkmark').classList.remove('hidden');
+        }
+    });
+}
+function selectAllMCQs() {
+    document.querySelectorAll('#mcqList input[type="checkbox"]').forEach(chk => {
+        if (!chk.checked) {
+            chk.checked = true;
+            selectedMcqs.add(Number(chk.value));
+        }
+    });
+    updateTotals();
+    updateSelectedCount();
 }
 
-function updateSelectedCount(){
+function updateSelectedCount() {
     const count = document.querySelectorAll('input[name="mcq_ids[]"]:checked').length;
     document.getElementById('selectedCount').innerText = "Selected MCQs: " + count;
 }
-
 </script>
 </x-app-layout>
