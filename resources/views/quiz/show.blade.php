@@ -317,17 +317,17 @@ document.querySelectorAll('.option').forEach(option => {
 // ====================================
 // SECURITY ANTI-CHEAT
 // ====================================
-// document.addEventListener("fullscreenchange", () => {
-//     if (!document.fullscreenElement) safeSubmit();
-// });
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) safeSubmit();
+});
 
-// document.addEventListener("visibilitychange", () => {
-//     if (document.hidden) safeSubmit();
-// });
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) safeSubmit();
+});
 
-// window.addEventListener("beforeunload", function () {
-//     safeSubmit();
-// });
+window.addEventListener("beforeunload", function () {
+    safeSubmit();
+});
 </script>
 <style>
     #questionStatusBox div.disabled {
