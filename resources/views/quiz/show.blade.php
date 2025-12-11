@@ -258,6 +258,17 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("beforeunload", function () {
     safeSubmit();
 });
+// =============================
+// SUBMIT BUTTON CLICK
+// =============================
+submitBtn.addEventListener('click', function (e) {
+    e.preventDefault(); // prevent default (extra safety)
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    safeSubmit(); // final secure submission
+});
 
 </script>
 
