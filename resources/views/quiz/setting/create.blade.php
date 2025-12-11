@@ -99,13 +99,39 @@
                         <input type="number" id="total_marks" class="border rounded w-full p-2 bg-gray-100" value="0" readonly>
                     </div>
                     <div>
+                        <label class="font-semibold block mb-2">Time Type</label>
+
+                       <div class="flex items-center mb-2">
+
+                        {{-- Time Per Question --}}
+                        <input type="radio"
+                            name="time_type"
+                            id="time_per_question_radio"
+                            value="1"
+                            class="mr-2"
+                            {{ old('time_type', isset($quiz) ? $quiz->time_type : 1) == 1 ? 'checked' : '' }}>
+                        <label for="time_per_question_radio">Time Per Question</label>
+
+                        {{-- Time For Whole Quiz --}}
+                        <input type="radio"
+                            name="time_type"
+                            id="time_per_quiz_radio"
+                            value="0"
+                            class="ml-4"
+                            {{ old('time_type', isset($quiz) ? $quiz->time_type : 1) == 0 ? 'checked' : '' }}>
+                        <label for="time_per_quiz_radio">Time For Whole Quiz</label>
+
+                    </div>
+
+                    </div>
+                    <div id="time_per_question_wrapper">
                         <label class="font-semibold">Time per Question (Seconds)<span class="text-red-500">*</span></label>
                         <input type="number" name="time_per_question" id="time_per_question" class="border rounded w-full p-2" value="{{ $quiz->time_per_question ?? 30 }}">
                         <p id="timeError" class="text-red-500 text-sm mt-1 hidden"></p>
                     </div>
-                    <div>
+                    <div id="total_time_wrapper">
                         <label class="font-semibold">Total Time (Minutes)<span class="text-red-500">*</span></label>
-                        <input type="text" id="total_time_minutes" class="border rounded w-full p-2 bg-gray-100" value="0" readonly>
+                        <input type="text" id="total_time_minutes" name="quiz_time" class="border rounded w-full p-2 bg-gray-100" value="{{ $quiz->quiz_time ?? old('quiz_time') }}" readonly>
                     </div>
                 </div>
                <div class="mb-3 mt-3">
@@ -263,7 +289,11 @@ function updateTotals(){
     const marks = Number(document.getElementById('marks_per_question').value);
     const time = Number(document.getElementById('time_per_question').value);
     document.getElementById('total_marks').value = selectedMcqs.size * marks;
-    document.getElementById('total_time_minutes').value = ((selectedMcqs.size * time)/60).toFixed(2);
+    const isPerQuestion = document.getElementById('time_per_question_radio').checked;
+    if(isPerQuestion){
+        
+            document.getElementById('total_time_minutes').value = ((selectedMcqs.size * time)/60).toFixed(2);
+    }
 }
 
 // Listen marks/time changes
@@ -340,6 +370,38 @@ function selectAllMCQs() {
 function updateSelectedCount() {
     const count = document.querySelectorAll('input[name="mcq_ids[]"]:checked').length;
     document.getElementById('selectedCount').innerText = "Selected MCQs: " + count;
+}
+
+// toggle to time per qution or time per quiz 
+document.getElementById('time_per_question_radio').addEventListener('change',toggleTimeInputs);
+document.getElementById('time_per_quiz_radio').addEventListener('change',toggleTimeInputs);
+    let savedQuizTime = {{ $quiz->quiz_time ?? 0 }}; // in seconds
+toggleTimeInputs();
+function  toggleTimeInputs(){
+    const isPerQuestion = document.getElementById('time_per_question_radio').checked;
+    const isPerQuiz =document.getElementById('time_per_quiz_radio').checked;
+    
+    const timePerQuestionWrapper = document.getElementById('time_per_question_wrapper');
+    const totalTimeWrapper = document.getElementById('total_time_wrapper');
+     const totalTimeInput = document.getElementById('total_time_minutes');
+    if(isPerQuiz){
+        timePerQuestionWrapper.classList.add('hidden');
+        // totalTimeWrapper.classList.remove('hidden');
+         totalTimeInput.removeAttribute('readonly');
+        totalTimeInput.classList.remove('bg-gray-100');
+         if (savedQuizTime > 0) {
+        document.getElementById('total_time_minutes').value = savedQuizTime / 60;
+    }
+
+    }
+     if(isPerQuestion){
+        timePerQuestionWrapper.classList.remove('hidden');
+         totalTimeWrapper.classList.remove('hidden');
+         totalTimeInput.setAttribute('readonly', true);
+        totalTimeInput.classList.add('bg-gray-100');
+        updateTotals();
+    }
+
 }
 </script>
 </x-app-layout>

@@ -116,4 +116,7 @@ Route::get('/run-migrations', function () {
         return "Error: " . $e->getMessage();
     }
 });
+Route::get('/check-debug', function () {
+    dd(env('APP_DEBUG'));
+});
 require __DIR__.'/auth.php';

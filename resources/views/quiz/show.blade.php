@@ -18,8 +18,13 @@
         @csrf
 
         <div class="text-right text-lg font-semibold mb-4">
-            ⏳ Time Left: <span id="timer">10</span>
+            @if($quiz->time_type == 1)
+                ⏳ Time Left (This Question): <span id="timer"></span>
+            @else
+                ⏳ Total Time Left: <span id="timer"></span>
+            @endif
         </div>
+
 
         @foreach($mcqs as $index => $mcq)
             <div class="question mb-6 p-4 border rounded-lg bg-white"
@@ -44,59 +49,72 @@
             </div>
         @endforeach
 
-        <div class="flex justify-end mt-4 gap-2">
-            <button type="button" id="nextBtn"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                Next
-            </button>
+        <div class="flex justify-between mt-4 items-center">
 
-            <button type="submit" id="submitBtn"
-                class="bg-green-600 text-white px-4 py-2 rounded-lg"
-                style="display:none;">
-                Submit
-            </button>
-        </div>
+    <!-- LEFT SIDE -->
+    <div id="leftButtons">
+        @if($quiz->time_type == 0)
+        <button type="button" id="prevBtn"
+            class="bg-gray-500 text-white px-4 py-2 rounded-lg">
+            Previous
+        </button>
+        @endif
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="flex gap-2">
+        <button type="button" id="nextBtn"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+            Next
+        </button>
+
+        <button type="submit" id="submitBtn"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg"
+            style="display:none;">
+            Submit
+        </button>
+    </div>
+
+</div>
+
 
     </form>
 
 </div>
 
 <script>
-// =============================
+// ====================================
 // VARIABLES
-// =============================
+// ====================================
 let current = 0;
-let timer = {{ $quiz->time_per_question ?? 30 }};
+
+// per question time (default)
+let perQuestionTime = {{ $quiz->time_per_question ?? 30 }};
+
+// quiz-level time in seconds
+let quizTotalTime = {{ $quiz->quiz_time ?? 0 }};
+
+// mode
+let isPerQuestion = {{ $quiz->time_type == 1 ? 'true' : 'false' }};
+
+let timer = isPerQuestion ? perQuestionTime : quizTotalTime;
+
 let countdown;
 let autoSubmitting = false;
 
 const questions = document.querySelectorAll('.question');
-const quizForm = document.getElementById('quizForm');
 const timerElement = document.getElementById('timer');
 const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn'); // only exists if type=0
 const submitBtn = document.getElementById('submitBtn');
-const startQuizBtn = document.getElementById('startQuizBtn');
 const startScreen = document.getElementById('startScreen');
-
-// Store initial screen size
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight;
+const startQuizBtn = document.getElementById('startQuizBtn');
+const quizForm = document.getElementById('quizForm');
 
 
-// =============================
-// FULLSCREEN FUNCTION
-// =============================
-function openFullscreen() {
-    let el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
-}
-
-
-// =============================
-// SAFE SUBMIT FUNCTION
-// =============================
+// ====================================
+// SAFE SUBMIT
+// ====================================
 function safeSubmit() {
     if (!autoSubmitting) {
         autoSubmitting = true;
@@ -105,9 +123,18 @@ function safeSubmit() {
 }
 
 
-// =============================
-// START QUIZ BUTTON
-// =============================
+// ====================================
+// FULLSCREEN
+// ====================================
+function openFullscreen() {
+    let el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+}
+
+
+// ====================================
+// START QUIZ
+// ====================================
 startQuizBtn.addEventListener('click', () => {
     openFullscreen();
 
@@ -119,13 +146,16 @@ startQuizBtn.addEventListener('click', () => {
 });
 
 
-// =============================
-// TIMER FUNCTIONS
-// =============================
+// ====================================
+// TIMER
+// ====================================
 function startTimer() {
     clearInterval(countdown);
-    timer = {{ $quiz->time_per_question ?? 30 }};
-    timerElement.innerText = formatTime(timer);
+
+    // per question or full quiz timer
+    timer = isPerQuestion ? perQuestionTime : quizTotalTime;
+
+  timerElement.innerText = formatTime(timer);
 
     countdown = setInterval(() => {
         timer--;
@@ -133,81 +163,98 @@ function startTimer() {
 
         if (timer <= 0) {
             clearInterval(countdown);
-            goToNextQuestion();
+
+            if (isPerQuestion) {
+                goToNextQuestion();
+            } else {
+                safeSubmit();
+            }
+        }
+
+        if (!isPerQuestion) {
+            quizTotalTime = timer; // update global value
         }
     }, 1000);
 }
 
+
 function formatTime(sec) {
-    return sec < 60 ? sec + " sec" : `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} min`;
+    return sec < 60 
+        ? sec + " sec"
+        : `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')} min`;
 }
 
 
-// =============================
+// ====================================
 // QUESTION NAVIGATION
-// =============================
+// ====================================
 function showQuestion(index) {
     questions.forEach((q, i) => {
         q.style.display = i === index ? 'block' : 'none';
     });
 
-    nextBtn.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
-    submitBtn.style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+    if (isPerQuestion) {
+        nextBtn.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+        submitBtn.style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+    } else {
+        // quiz-level mode
+        nextBtn.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+        submitBtn.style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+        prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+    }
 }
 
 function goToNextQuestion() {
     if (current < questions.length - 1) {
         current++;
         showQuestion(current);
-        startTimer();
+
+        if (isPerQuestion) startTimer();
     } else {
         safeSubmit();
     }
 }
 
+function goToPrevQuestion() {
+    if (current > 0) {
+        current--;
+        showQuestion(current);
+    }
+}
+
+
+// ====================================
+// BUTTON EVENTS
+// ====================================
 nextBtn.addEventListener('click', () => {
-    clearInterval(countdown);
+    if (isPerQuestion) clearInterval(countdown);
     goToNextQuestion();
 });
 
+if (!isPerQuestion) {
+    prevBtn.addEventListener('click', () => {
+        goToPrevQuestion();
+    });
+}
 
-// =============================
-// SUBMIT BUTTON CLICK
-// =============================
-submitBtn.addEventListener('click', function(e) {
-    e.preventDefault(); // prevent default just in case
+submitBtn.addEventListener('click', function (e) {
+    e.preventDefault();
     submitBtn.disabled = true;
-    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
     safeSubmit();
 });
 
 
-// =============================
-// SECURITY / ANTI-CHEAT
-// =============================
-
-// Exit fullscreen → auto submit
+// ====================================
+// SECURITY ANTI-CHEAT
+// ====================================
 document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) {
-        safeSubmit();
-    }
+    if (!document.fullscreenElement) safeSubmit();
 });
 
-// Tab switch / minimize
 document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-        safeSubmit();
-    }
+    if (document.hidden) safeSubmit();
 });
 
-// Window resize
-window.addEventListener("resize", () => {
-    if (window.innerWidth < screenWidth - 50 || window.innerHeight < screenHeight - 50) {
-        safeSubmit();
-    }
-});
-
-// Page reload / close
 window.addEventListener("beforeunload", function () {
     safeSubmit();
 });

@@ -87,6 +87,8 @@ class QuizSettingController extends Controller
 
         public function store(Request $request)
 {
+
+  
     // Validate request
     $request->validate([
         'quiz_title'         => 'required|string|max:255',
@@ -102,7 +104,14 @@ class QuizSettingController extends Controller
         'mcq_ids.min'      => 'Select at least one MCQ.',
         'category_ids.required' => 'Please select at least one category.',
     ]);
-
+    if ($request->time_type == 1) {
+        // Time Per Question
+        $quiz_time = $request->question_count * $request->time_per_question;
+    } else {
+        // Time For Whole Quiz
+        $quiz_time = $request->quiz_time*60;
+    }
+ 
     // Create or update quiz
     $quiz = Quiz::updateOrCreate(
         ['id' => $request->quiz_id ?? null], // null if creating new
@@ -112,9 +121,10 @@ class QuizSettingController extends Controller
             'marks_per_question' => $request->marks_per_question,
             'time_per_question'  => $request->time_per_question,
             'total_marks'        => $request->question_count * $request->marks_per_question,
-            'quiz_time'          => $request->question_count * $request->time_per_question,
-            'description'        =>$request->description ?? '',
+            'quiz_time'          => $quiz_time,
+            'description'        => $request->description ?? '',
             'rules'              => $request->rules ?? '',
+            'time_type'          => $request->time_type ?? 1,
         ]
     );
 
@@ -173,7 +183,13 @@ public function update(Request $request, Quiz $quiz)
         'mcq_ids'            => 'required|array|min:1',
         'mcq_ids.*'          => 'exists:mcqs,id',
     ]);
-
+    if ($request->time_type == 1) {
+        // Time Per Question
+        $quiz_time = count($request->mcq_ids) * $request->time_per_question;
+    } else {
+        // Time For Whole Quiz
+        $quiz_time = $request->quiz_time*60;
+    }
     $quiz->update([
         'title' => $request->quiz_title,
         'question_count' => count($request->mcq_ids),
@@ -181,8 +197,9 @@ public function update(Request $request, Quiz $quiz)
         'time_per_question' => $request->time_per_question,
         'description'=>$request->description ?? '',
         'rules'=> $request->rules ?? '',
+        'time_type'=> $request->time_type ?? 1,
         'total_marks' => count($request->mcq_ids) * $request->marks_per_question,
-        'quiz_time' => count($request->mcq_ids) * $request->time_per_question,
+        'quiz_time' => $quiz_time,
     ]);
 
     $quiz->categories()->sync($request->category_ids);

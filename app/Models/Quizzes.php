@@ -17,6 +17,7 @@ class Quizzes extends Model
         'rules',
         'marks_per_question',
         'time_per_question',
+        'time_type',
     ];
     public function category()
 {

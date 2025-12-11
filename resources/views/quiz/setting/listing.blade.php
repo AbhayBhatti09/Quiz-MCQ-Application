@@ -99,31 +99,37 @@ $(document).ready(function() {
         ordering: true,
         searching: true
     });
-$(".activeToggle").on("change", function () {
-    let quizId = $(this).data("id");
-    let status = $(this).is(":checked") ? 1 : 0;
-
-    let textLabel = $(this).closest("label").find("span");
+// delegated event will catch dynamically added checkboxes too
+$(document).on('change', '.activeToggle', function () {
+    const $checkbox = $(this);
+    const quizId = $checkbox.data('id');
+    const status = $checkbox.is(':checked') ? 1 : 0;
+    const textLabel = $checkbox.closest('label').find('span');
+    const url = "{{ route('quiz.setting.toggle') }}";
+    const token = "{{ csrf_token() }}";
 
     $.ajax({
-        url: "{{ route('quiz.setting.toggle') }}",
-        method: "POST",
+        url: url,
+        method: 'POST',
         data: {
-            _token: "{{ csrf_token() }}",
+            _token: token,
             quiz_id: quizId,
             status: status
         },
-        success: function () {
-
-            // Update only this row text
-            textLabel.text(status ? "Yes" : "No");
-
-            Swal.fire({
-                icon: "success",
-                title: "Quiz status updated!",
-                timer: 800,
-                showConfirmButton: false
-            });
+        beforeSend() {
+            $checkbox.prop('disabled', true);
+        },
+        success() {
+            textLabel.text(status ? 'Yes' : 'No');
+            Swal.fire({ icon: 'success', title: 'Quiz status updated!', timer: 800, showConfirmButton: false });
+        },
+        error() {
+            // revert checkbox on error
+            $checkbox.prop('checked', !status);
+            Swal.fire({ icon: 'error', title: 'Update failed', text: 'Please try again' });
+        },
+        complete() {
+            $checkbox.prop('disabled', false);
         }
     });
 });
