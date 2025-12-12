@@ -45,4 +45,26 @@
 
         </div>
     </body>
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+document.onkeydown = (e) => {
+    if (e.keyCode == 123) return false; // F12
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 73) return false; // Ctrl+Shift+I
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 74) return false; // Ctrl+Shift+J
+    if (e.ctrlKey && e.keyCode == 85) return false; // Ctrl+U
+};
+
+let devtools = false;
+setInterval(() => {
+    const threshold = 160;
+    if (window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold) {
+
+        if (!devtools) {
+            devtools = true;
+            safeSubmit();
+        }
+    }
+}, 500);
+    </script>
 </html>
