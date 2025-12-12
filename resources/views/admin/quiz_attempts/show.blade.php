@@ -43,7 +43,7 @@
         <div class="flex justify-between border-b pb-2">
             <strong>⚠️ Wrong Answers</strong>
             <span class="text-red-600 font-semibold">
-                {{ ($attempt->total_attended ?? 0) - ($attempt->score ?? 0) }}
+                {{ $attempt->total_attended ? ($attempt->total_attended ?? 0) - ($attempt->score ?? 0) : 0 }}
             </span>
         </div>
         <div class="flex justify-between border-b pb-2">
