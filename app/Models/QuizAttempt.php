@@ -10,7 +10,7 @@ use App\Models\Quizzes as Quiz;
 class QuizAttempt extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'quiz_id', 'score'];
+    protected $fillable = ['user_id', 'quiz_id', 'score','total_questions','total_attended','not_attended'];
 
     public function user()
     {

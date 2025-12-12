@@ -41,7 +41,7 @@
                         <td class="border p-2">{{ $attempt->quiz->total_marks ?? 'NA'}}</td>
                         <td class="border p-2">{{ $attempt->score ?? 'NA'}}</td>
                         <td class="border text-center p-2">
-                            {{ $attempt->score && $attempt->quiz ? $attempt->score * $attempt->quiz->marks_per_question : '0' }}
+                            {{ $attempt->scoremarks ?? 0 }}
                         </td>
                         @endif
                         <td class="border p-2">{{ $attempt->created_at->timezone('Asia/Kolkata')->format('d M Y h:i A') }}</td>

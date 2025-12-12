@@ -5,35 +5,91 @@
         Quiz Attempt Review
     </h1>
 
-   <div class=" mb-6 p-4 border rounded-lg p-6 mt-4 mb-2">
-    <h2 class="text-xl font-bold text-center mb-4">User attempt Details</h2>
-     <hr class="mb-6">
-    <div class="space-y-2"> 
-      <p><strong>Candidate Name:</strong> {{ $attempt->user->name ?? 'N/A' }}</p>
+   <div class="mb-6 p-6 rounded-2xl  border bg-white mt-6">
 
-<p><strong>Quiz:</strong> {{ $attempt->quiz->title ?? 'N/A' }}</p>
+    <h2 class="text-2xl font-bold text-center mb-6 text-indigo-700">
+        📝 User Attempt Details
+    </h2>
 
-<p><strong>Score:</strong> 
-    {{ $attempt->score ?? 0 }} / 
-    {{ $attempt->answers->count() ?? 0 }}
-</p>
+    <div class="space-y-5 text-gray-800">
 
-<p><strong>Marks:</strong>
-    @php
-        $scoreMarks = ($attempt->score ?? 0) * ($attempt->quiz->marks_per_question ?? 0);
-        $totalMarks = $attempt->quiz->total_marks ?? 0;
-    @endphp
+        <div class="flex justify-between border-b pb-2">
+            <strong>👤 Candidate</strong>
+            <span>{{ $attempt->user->name ?? 'N/A' }}</span>
+        </div>
 
-    {{ $scoreMarks }} of {{ $totalMarks }}
-</p>
+        <div class="flex justify-between border-b pb-2">
+            <strong>📘 Quiz</strong>
+            <span>{{ $attempt->quiz->title ?? 'N/A' }}</span>
+        </div>
 
-<p><strong>Percentage:</strong>
-    @if($totalMarks > 0)
-        {{ number_format(($scoreMarks / $totalMarks) * 100, 2) }}%
-    @else
-        N/A
-    @endif
-</p>
+        <div class="flex justify-between border-b pb-2">
+            <strong>✔️ Correct Answers</strong>
+            <span class="text-green-600 font-semibold">
+                {{ $attempt->score ?? 0 }} / {{ $attempt->answers->count() ?? 0 }}
+            </span>
+        </div>
+
+        <div class="flex justify-between border-b pb-2">
+            <strong>📝 Attended Questions</strong>
+            <span>{{ $attempt->total_attended ?? 0 }}</span>
+        </div>
+
+        <div class="flex justify-between border-b pb-2">
+            <strong>❌ Not Attended</strong>
+            <span>{{ $attempt->not_attended ?? 0 }}</span>
+        </div>
+
+        <div class="flex justify-between border-b pb-2">
+            <strong>⚠️ Wrong Answers</strong>
+            <span class="text-red-600 font-semibold">
+                {{ ($attempt->total_attended ?? 0) - ($attempt->score ?? 0) }}
+            </span>
+        </div>
+        <div class="flex justify-between border-b pb-2">
+            <strong>Negative marking(%)</strong>
+            <span class="text-red-600 font-semibold">
+                {{ $attempt->quiz->negative_value ?? 'No Negative Marking' }}
+            </span>
+        </div>
+
+
+        {{-- MARKS CALCULATION --}}
+        @php
+            $quiz = $attempt->quiz;
+            $marksPerQ = $quiz->marks_per_question ?? 0;
+
+            if ($quiz->negative_marking == 1) {
+                $wrong = ($attempt->total_attended ?? 0) - ($attempt->score ?? 0);
+                $finalCorrect = ($attempt->score ?? 0) - ($wrong * ($quiz->negative_value ?? 0));
+                $scoreMarks = max(0, $finalCorrect * $marksPerQ);
+            } else {
+                $scoreMarks = ($attempt->score ?? 0) * $marksPerQ;
+            }
+
+            $totalMarks = $quiz->total_marks ?? 0;
+            $percentage = $totalMarks > 0 ? (($scoreMarks / $totalMarks) * 100) : 0;
+        @endphp
+
+        <div class="flex justify-between border-b pb-2">
+            <strong>🏆 Marks Obtained</strong>
+            <span class="font-semibold text-indigo-700">{{ $scoreMarks }} / {{ $totalMarks }}</span>
+        </div>
+
+        <div class="flex justify-between">
+            <strong>📊 Percentage</strong>
+            <span class="font-bold 
+                @if($percentage >= 75)
+                    text-green-600
+                @elseif($percentage >= 50)
+                    text-yellow-600
+                @else
+                    text-red-600
+                @endif
+            ">
+                {{ number_format($percentage, 2) }}%
+            </span>
+        </div>
 
     </div>
 </div>

@@ -133,6 +133,42 @@
                         <label class="font-semibold">Total Time (Minutes)<span class="text-red-500">*</span></label>
                         <input type="text" id="total_time_minutes" name="quiz_time" class="border rounded w-full p-2 bg-gray-100" value="{{ $quiz->quiz_time ?? old('quiz_time') }}" readonly>
                     </div>
+                    <div>
+                        <label class="font-semibold block mb-2">Negative Marking</label>
+
+                        <div class="flex items-center mb-2">
+                            <input type="radio"
+                                name="negative_marking"
+                                id="negative_marking_yes"
+                                value="1"
+                                class="mr-2 neg-radio"
+                                {{ old('negative_marking', isset($quiz) ? $quiz->negative_marking : 0) == 1 ? 'checked' : '' }}>
+                            <label for="negative_marking_yes">Yes</label>
+
+                            <input type="radio"
+                                name="negative_marking"
+                                id="negative_marking_no"
+                                value="0"
+                                class="ml-4 mr-2 neg-radio"
+                                {{ old('negative_marking', isset($quiz) ? $quiz->negative_marking : 0) == 0 ? 'checked' : '' }}>
+                            <label for="negative_marking_no">No</label>
+                        </div>
+
+                        <!-- Dropdown -->
+                       
+                    </div>
+                     <div id="negative_value_box" style="display: none;">
+                            <label class="font-semibold mb-1 block">Select Negative Mark</label>
+                            <select name="negative_value" class="form-select w-full border rounded p-2">
+                                <option value="" class="text-center">-- Select Negative Mark --</option>
+                                <option value="0.10" {{ old('negative_value', $quiz->negative_value ?? '') == '0.10' ? 'selected' : '' }}>0.10</option>
+                                <option value="0.20" {{ old('negative_value', $quiz->negative_value ?? '') == '0.20' ? 'selected' : '' }}>0.20</option>
+                                <option value="0.25" {{ old('negative_value', $quiz->negative_value ?? '') == '0.25' ? 'selected' : '' }}>0.25</option>
+                                <option value="0.50" {{ old('negative_value', $quiz->negative_value ?? '') == '0.50' ? 'selected' : '' }}>0.50</option>
+                            </select>
+                              <p id="negativeValueError" class="text-red-500 text-sm mt-1 hidden"></p>
+                        </div>
+
                 </div>
                <div class="mb-3 mt-3">
                     <label class="font-semibold">Description </label>
@@ -150,6 +186,8 @@
                     <button type="button" class="px-4 py-2 bg-gray-400 text-white rounded mr-2" onclick="goStep2Back()">Back</button>
                     <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">{{ isset($quiz) ? 'Update Quiz' : 'Create Quiz' }}</button>
                 </div>
+               
+
             </div>
 
         </form>
@@ -313,6 +351,20 @@ document.getElementById('quizForm').addEventListener('submit', function(e){
         document.getElementById('step3Error').classList.add('hidden');
     }
 
+const negativeYes = document.getElementById('negative_marking_yes').checked;
+    const negativeValue = document.querySelector('select[name="negative_value"]').value;
+
+       if(negativeYes && (negativeValue === "" || negativeValue === null)) {
+        document.getElementById('negativeValueError').textContent = "Please select negative mark value.";
+        document.getElementById('negativeValueError').classList.remove('hidden');
+        valid = false;
+        goStep3();
+    } else {
+        if(document.getElementById('negativeValueError')){
+            document.getElementById('negativeValueError').classList.add('hidden');
+        }
+    }
+
     const marks = Number(document.getElementById('marks_per_question').value);
     if(isNaN(marks) || marks <= 0){
         document.getElementById('marksError').textContent = "Marks per question must be greater than 0.";
@@ -333,8 +385,7 @@ document.getElementById('quizForm').addEventListener('submit', function(e){
         document.getElementById('timeError').classList.add('hidden');
     }
 
-
-
+    
 
 
     if(selectedMcqs.size === 0){
@@ -403,5 +454,17 @@ function  toggleTimeInputs(){
     }
 
 }
+  function toggleNegativeBox() {
+        const yesRadio = document.getElementById('negative_marking_yes');
+        const box = document.getElementById('negative_value_box');
+
+        box.style.display = yesRadio.checked ? 'block' : 'none';
+    }
+
+    window.onload = toggleNegativeBox;
+
+    document.querySelectorAll('.neg-radio').forEach(radio => {
+        radio.addEventListener('change', toggleNegativeBox);
+    });
 </script>
 </x-app-layout>

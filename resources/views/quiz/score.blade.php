@@ -40,6 +40,33 @@
 
                     </div>
 
+                    <!-- 🔥 NEW SECTION: Total / Answered / Not Answered -->
+                    <div class="row g-4 mt-4">
+
+                        <div class="col-12 col-md-4">
+                            <div class="p-4 text-center bg-light rounded-4 shadow-sm">
+                                <p class="fw-semibold text-secondary mb-1">Total Questions</p>
+                                <h2 class="fw-bold text-dark">{{ $total }}</h2>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="p-4 text-center bg-light rounded-4 shadow-sm">
+                                <p class="fw-semibold text-secondary mb-1">Attended Questions</p>
+                                <h2 class="fw-bold text-success">{{ $total_attended }}</h2>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="p-4 text-center bg-light rounded-4 shadow-sm">
+                                <p class="fw-semibold text-secondary mb-1">Not Attended Questions</p>
+                                <h2 class="fw-bold text-danger">{{ $not_attended }}</h2>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- END NEW SECTION -->
+
                     <!-- Percentage -->
                     @if($totalMarks > 0)
                     <div class="text-center mt-4">
@@ -79,17 +106,17 @@
                     <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
 
                         <a href="{{ route('quiz.review', $quiz->id) }}"
-                           class="btn btn-success px-4 py-2  ">
+                           class="btn btn-success px-4 py-2">
                            Check Your Answers
                         </a>
 
                         <a href="{{ route('quiz.index') }}"
-                           class="btn btn-primary px-4 py-2  ">
+                           class="btn btn-primary px-4 py-2">
                            Back to Quiz
                         </a>
 
                         <a href="{{ route('quiz.show', $quiz->id) }}"
-                           class="btn btn-success px-4 py-2   text-white">
+                           class="btn btn-success px-4 py-2 text-white">
                            Try Again
                         </a>
 

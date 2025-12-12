@@ -18,6 +18,8 @@ class Quizzes extends Model
         'marks_per_question',
         'time_per_question',
         'time_type',
+        'negative_value',
+        'negative_marking',
     ];
     public function category()
 {

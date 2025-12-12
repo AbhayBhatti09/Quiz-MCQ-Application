@@ -35,15 +35,20 @@
             </tr>
            
            @if($quiz->time_type == 1)
-            <tr class="border-b">
+            <tr class="border-b bg-gray-50">
                 <td class="p-3 font-semibold">Time per Question</td>
                 <td class="p-3">{{ $quiz->time_per_question }} sec</td>
             </tr>
             @endif
-            <tr class="bg-gray-50">
+            <tr class="border-b">
                 <td class="p-3 font-semibold">Total Time</td>
                 <td class="p-3">{{ ($quiz->quiz_time)/60 }} minutes</td>
             </tr>
+            <tr class="bg-gray-50">
+                <td class="p-3 font-semibold">Negative Marking(%)</td>
+                <td class="p-3">{{ $quiz->negative_value ?? 'No Negative marking'}}</td>
+            </tr>
+
         </tbody>
     </table>
 </div>

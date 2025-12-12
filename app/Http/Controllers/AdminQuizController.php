@@ -20,6 +20,31 @@ class AdminQuizController extends Controller
             ->latest()
             ->get();
     }
+       // ======== Add Score Calculation to Each Attempt ========= //
+    foreach ($attempts as $attempt) {
+        $quiz = $attempt->quiz;
+        $marksPerQ = $quiz->marks_per_question ?? 0;
+        if (!$quiz) {
+                $attempt->scoremarks = 0; // or skip
+                continue;
+            }
+
+
+        if ($quiz->negative_marking == 1) {
+            // Wrong answers
+            $wrong = ($attempt->total_attended ?? 0) - ($attempt->score ?? 0);
+
+            // Apply negative value
+            $finalCorrect = ($attempt->score ?? 0) - ($wrong * ($quiz->negative_value ?? 0));
+
+            // Score marks (never negative)
+            $attempt->scoremarks = max(0, $finalCorrect * $marksPerQ);
+
+        } else {
+            // No negative marking
+            $attempt->scoremarks = ($attempt->score ?? 0) * $marksPerQ;
+        }
+    }
 
         return view('admin.quiz_attempts.index', compact('attempts'));
     }

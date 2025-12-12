@@ -88,7 +88,7 @@ class QuizSettingController extends Controller
         public function store(Request $request)
 {
 
-  
+   
     // Validate request
     $request->validate([
         'quiz_title'         => 'required|string|max:255',
@@ -99,6 +99,8 @@ class QuizSettingController extends Controller
         'category_ids.*'     => 'exists:categories,id',
         'mcq_ids'            => 'required|array|min:1',
         'mcq_ids.*'          => 'exists:mcqs,id',
+       // 'negative_marking' => 'required|boolean',
+       // 'negative_value' => 'required_if:negative_marking,1|in:0.10,0.20,0.25,0.50',
     ], [
         'mcq_ids.required' => 'Please select at least one MCQ.',
         'mcq_ids.min'      => 'Select at least one MCQ.',
@@ -125,6 +127,8 @@ class QuizSettingController extends Controller
             'description'        => $request->description ?? '',
             'rules'              => $request->rules ?? '',
             'time_type'          => $request->time_type ?? 1,
+            'negative_marking'=>$request->negative_marking ?? 0,
+            'negative_value'=>$request->negative_value ?? 0,
         ]
     );
 
@@ -191,15 +195,17 @@ public function update(Request $request, Quiz $quiz)
         $quiz_time = $request->quiz_time*60;
     }
     $quiz->update([
-        'title' => $request->quiz_title,
-        'question_count' => count($request->mcq_ids),
-        'marks_per_question' => $request->marks_per_question,
-        'time_per_question' => $request->time_per_question,
-        'description'=>$request->description ?? '',
-        'rules'=> $request->rules ?? '',
-        'time_type'=> $request->time_type ?? 1,
-        'total_marks' => count($request->mcq_ids) * $request->marks_per_question,
-        'quiz_time' => $quiz_time,
+        'title'                     => $request->quiz_title,
+        'question_count'            => count($request->mcq_ids),
+        'marks_per_question'        => $request->marks_per_question,
+        'time_per_question'         => $request->time_per_question,
+        'description'               =>$request->description ?? '',
+        'rules'                     => $request->rules ?? '',
+        'time_type'                 => $request->time_type ?? 1,
+        'total_marks'               => count($request->mcq_ids) * $request->marks_per_question,
+        'quiz_time'                 => $quiz_time,
+        'negative_marking'          =>$request->negative_marking ?? 0,
+        'negative_value'            =>$request->negative_value ?? 0,
     ]);
 
     $quiz->categories()->sync($request->category_ids);

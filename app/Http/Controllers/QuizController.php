@@ -67,6 +67,11 @@ class QuizController extends Controller
         ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
         ->get();
 
+    // count 
+    $totalQuestions = $quiz->mcqs()->count();
+    $totalattended = count(array_filter($answers));
+    $notAttended = $totalQuestions - $totalattended;
+
     $score = 0;
     $review = [];
 
@@ -74,6 +79,9 @@ class QuizController extends Controller
     $attempt = QuizAttempt::create([
         'user_id' => auth()->id(),
         'quiz_id' => $quiz->id,
+        'total_questions' => $totalQuestions,
+        'total_attended' => $totalattended,
+        'not_attended' => $notAttended,
     ]);
     
     foreach ($mcqs as $mcq) {
@@ -106,7 +114,7 @@ class QuizController extends Controller
             'is_correct' => $isCorrect,
         ]);
     }
-   
+  
     // Update attempt score
     $attempt->update(['score' => $score]);
 
@@ -166,15 +174,26 @@ private  function sendQuizEmail($user, $quiz, $score, $total){
     }
 
     $totalMarks = $quiz->total_marks ?? 0;
-    $scoremarks = ($quiz->marks_per_question ?? 0) * ($attempt->score ?? 0);
+    // If negative marking
+    if($quiz->negative_marking==1){
+        // negative marks
+        $WrongAnswer= ($attempt->total_attended)-($attempt->score); // wrong answer find
+        $totaltrueAnswer=($attempt->score)-( $WrongAnswer* $quiz->negative_value); //
+
+        $scoremarks=($quiz->marks_per_question ?? 0) * ($totaltrueAnswer ?? 0);
+    }else{
+        $scoremarks = ($quiz->marks_per_question ?? 0) * ($attempt->score ?? 0);
+    }
 
     return view('quiz.score', [
         'quiz' => $quiz,
-        'score' => $attempt->score,
-        'total' => $attempt->quiz->mcqs->count(),
-        'totalMarks' => $totalMarks,
-        'scoremarks' => $scoremarks,
+        'score' => $attempt->score ?? 0,
+        'total' => $attempt->quiz->mcqs->count() ?? 0,
+        'totalMarks' => $totalMarks ?? 0,
+        'scoremarks' => $scoremarks ?? 0,
         'review' => $review,
+        'total_attended' => $attempt->total_attended ?? 0,
+        'not_attended' => $attempt->not_attended ?? 0,
     ]);
 }
 
