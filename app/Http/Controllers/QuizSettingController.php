@@ -113,6 +113,11 @@ class QuizSettingController extends Controller
         // Time For Whole Quiz
         $quiz_time = $request->quiz_time*60;
     }
+    if($request->negative_marking==1){
+        $negative_value=$request->negative_value ?? 0;
+    }else{
+        $negative_value=null;
+    }
  
     // Create or update quiz
     $quiz = Quiz::updateOrCreate(
@@ -128,7 +133,7 @@ class QuizSettingController extends Controller
             'rules'              => $request->rules ?? '',
             'time_type'          => $request->time_type ?? 1,
             'negative_marking'=>$request->negative_marking ?? 0,
-            'negative_value'=>$request->negative_value ?? 0,
+            'negative_value'=>$negative_value,
         ]
     );
 
@@ -194,6 +199,11 @@ public function update(Request $request, Quiz $quiz)
         // Time For Whole Quiz
         $quiz_time = $request->quiz_time*60;
     }
+     if($request->negative_marking==1){
+        $negative_value=$request->negative_value ?? 0;
+    }else{
+        $negative_value=null;
+    }
     $quiz->update([
         'title'                     => $request->quiz_title,
         'question_count'            => count($request->mcq_ids),
@@ -205,7 +215,7 @@ public function update(Request $request, Quiz $quiz)
         'total_marks'               => count($request->mcq_ids) * $request->marks_per_question,
         'quiz_time'                 => $quiz_time,
         'negative_marking'          =>$request->negative_marking ?? 0,
-        'negative_value'            =>$request->negative_value ?? 0,
+        'negative_value'            =>$negative_value,
     ]);
 
     $quiz->categories()->sync($request->category_ids);
