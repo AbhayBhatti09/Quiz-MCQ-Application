@@ -71,8 +71,8 @@
                     @if($totalMarks > 0)
                     <div class="text-center mt-4">
                         <p class="fw-semibold text-secondary">Percentage</p>
-                        <h3 class="fw-bold text-info">
-                            {{ number_format(($scoremarks / $totalMarks) * 100, 2) }}%
+                        <h3 class="fw-bold text-info"> $scoremarks ?
+                            {{ number_format(($scoremarks / $totalMarks) * 100, 2) }}% : 0.00 %
                         </h3>
                     </div>
                     @endif
