@@ -33,7 +33,7 @@
                             <div class="p-4 text-center bg-light rounded-4 shadow-sm">
                                 <p class="fw-semibold text-secondary mb-1">Score</p>
                                 <h2 class="fw-bold text-primary">
-                                    {{ $scoremarks }} / {{ $totalMarks }}
+                                    {{ $scoremarks > 0 ? $scoremarks : 0  }} / {{ $totalMarks }}
                                 </h2>
                             </div>
                         </div>
