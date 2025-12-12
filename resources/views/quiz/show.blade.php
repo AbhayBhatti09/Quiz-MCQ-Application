@@ -328,6 +328,25 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("beforeunload", function () {
     safeSubmit();
 });
+document.onkeydown = function (e) {
+    if (e.keyCode == 123) return false;
+    if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) return false;
+    if (e.ctrlKey && e.keyCode == 85) return false;
+};
+
+// Detect devtools open
+let devtools = false;
+setInterval(() => {
+    const threshold = 160;
+    if (window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold) {
+
+        if (!devtools) {
+            devtools = true;
+            safeSubmit(); // auto-submit quiz
+        }
+    }
+}, 500);
 </script>
 <style>
     #questionStatusBox div.disabled {
