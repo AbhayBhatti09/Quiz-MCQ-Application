@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('mcq_per_timer')
                 ->default(30)
                 ->comment('Default timer is 30 seconds per question')
-                ->after('marks');
+                ->after('quiz_selected');
         });
     }
 

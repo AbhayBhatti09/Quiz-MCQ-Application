@@ -134,7 +134,7 @@
                     {{-- Wrong user answer --}}
                     @if($isUser && !$isCorrect)
                         <span class="absolute right-3 top-3 text-xs bg-red-300 text-white px-2 py-1 rounded">
-                            ❌ User Answer
+                            ❌ Your Answer
                         </span>
                     @endif
 
@@ -148,7 +148,7 @@
                     {{-- Correct & selected --}}
                     @if($isCorrect && $isUser && $is_score)
                         <span class="absolute right-3 top-3 text-xs bg-green-600 text-white px-2 py-1 rounded">
-                            ✔ User Answer
+                            ✔ Your Answer
                         </span>
                     @endif
                 </div>
