@@ -2,7 +2,7 @@
 <div class="max-w-3xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
 
     <h1 class="text-3xl font-bold mb-6 text-center">
-        Quiz Attempt Review
+        Quiz Attempt Review 
     </h1>
 
    <div class="mb-6 p-6 rounded-2xl  border bg-white mt-6">
